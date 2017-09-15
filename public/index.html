@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Followers</title>
+
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<!-- Custom Fonts -->
+	<link href="css/FontAwsome/css/font-awesome.min.css" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+	
+    <!-- Custom CSS -->
+    <link href="css/lyrium.css" rel="stylesheet">
+</head>
+
+<body>
+<body>
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<div class="text-vertical-center search">
+			<form id="nickname_form" class="">
+			  <div class="input_nickname">
+				<input id="nickname" name="" type="search" placeholder="name.surname" autocomplete="off"  autofocus class="nickname">
+				<i aria-hidden="true" class="fa fa-search fa-4x fa-icon" id ="senderIcon"></i>
+				<button id="senderButton" style="display: none" >Send</button>
+			  </div>
+			</form>
+        </div>
+    </nav>
+
+    <div id="wrapper">
+          <div id="page-wrapper">
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-lg-12">
+                          <span id="responseHTML"></span>
+                        </ol>
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+        </div>
+        <!-- /#page-wrapper -->
+    </div>
+	
+	<script src="js/jquery.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script src="/js/index.js"></script>	
+</body>
+
+</html>

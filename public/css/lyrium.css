@@ -1,0 +1,106 @@
+html {
+	height: 100%;
+}
+body {
+    margin-top: 100px;
+    background: url(../img/low-poly.png) no-repeat bottom center scroll;
+	background-attachment: fixed;
+}
+
+
+#wrapper {
+    padding-left: 0;
+}
+
+#page-wrapper {
+    width: 100%;
+    padding: 0;
+    background-color: #fff;
+	width: 70%;
+    margin-left: 10px;
+	margin-top: 170px;
+	opacity: 0.75;
+	color: black;
+}
+
+@media(min-width:768px) {
+    #wrapper {
+        padding-left: 150px;
+    }
+
+    #page-wrapper {
+        padding: 10px;
+		margin-top: 110px;
+    }
+	
+	.input_nickname {
+		margin-left: 160px;
+	}
+	
+}
+
+.navbar-inverse {
+	border-width: 0 0 5px;
+	position: absolute;
+}
+
+*:focus {
+    outline: none;
+}
+
+.nickname {
+	background-color: rgba(0,0,0,0);
+	border: none;
+	width: 70%;
+	color: white;
+	height: 100px;
+	top: 50%;
+	font-size: -webkit-xxx-large;
+}
+
+.fa-icon {
+	margin-left: -50px;
+}
+
+
+/* Side Navigation */
+@media(min-width:768px) {
+    .side-nav {
+        position: fixed;
+        top: 100px;
+        left: 225px;
+        width: 150px;
+        margin-left: -225px;
+        border: none;
+        border-radius: 0;
+        overflow-y: auto;
+        bottom: 0;
+        overflow-x: hidden;
+        padding-bottom: 40px;
+    }
+
+    .side-nav>li>a {
+        width: 150px;
+    }
+
+    .side-nav li a:hover,
+    .side-nav li a:focus {
+        outline: none;
+        background-color: #000 !important;
+    }
+}
+
+.side-nav>li>ul {
+    padding: 0;
+}
+
+.side-nav>li>ul>li>a {
+    display: block;
+    padding: 10px 15px 10px 38px;
+    text-decoration: none;
+    color: #999;
+}
+
+.side-nav>li>ul>li>a:hover {
+    color: #fff;
+}
