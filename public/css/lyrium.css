@@ -12,6 +12,10 @@ body {
     padding-left: 0;
 }
 
+li {
+	margin: 5px;
+}
+
 #page-wrapper {
     width: 100%;
     padding: 0;
@@ -19,7 +23,7 @@ body {
 	width: 70%;
     margin-left: 10px;
 	margin-top: 170px;
-	opacity: 0.75;
+	opacity: 0.95;
 	color: black;
 }
 

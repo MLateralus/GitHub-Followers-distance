@@ -11,28 +11,48 @@ const socketIO = require('socket.io');
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
+
+// Initialize location for debug
 var current_location = 'Kraków';
 
 app.use(express.static(publicPath));
 
 // Socket.io onConnection
-io.on('connection', function(socket){
+io.on('connection', function(socket) {
 
-	socket.on('createMessage', function (message){
-		console.log("Server recieved :" + JSON.stringify(message))
+    socket.on('createMessage', function(message) {
+        console.log("Server recieved :" + JSON.stringify(message))
 
-		getCurrentLocation(message.text, function(result){
-			current_location = result.location;
-			findFollowers(message.text);
-			
-			// Debug: 
-			//var dict = [{"MToska": "Berlin"}, {"dolohow": "Cracow"}, {"THenry": "Sydney"}];
-			//handleFullResponse(dict)
-		});
+        // getCurrentLocation(message.text, function(result){
+        // current_location = result.location;
+
+        // //Build current user
+        // io.emit('userInfo', result);
+        // findFollowers(message.text);
+        // io.emit('setLoading', "");
+
+        // });
 		
 		// Debug:
-		//var dict = [{"MToska": "Moscow"}, {"dolohow": "Lublin"}, {"THenry": "Amsterdam"}];
-		//handleFullResponse(dict)
+		var dict = [
+			{"key":"plnice","value":"Cracow, Poland"},
+			{"key":"cusspvz","value":"PÃ³voa de Varzim, Porto, Portugal"},
+			{"key":"THenry14","value":null},{"key":"Jarema","value":"Poland"},
+			{"key":"brunocasanova","value":"PÃ³voa de Varzim, Porto, Portugal"},
+			{"key":"mgwhitfield","value":"Boulder, CO"},
+			{"key":"Svarkovsky","value":"Ukraine"},
+			{"key":"slapab","value":"Krakow"},
+			{"key":"hagom","value":null},
+			{"key":"szemek","value":"GdaÅsk, Poland"},
+			{"key":"Faridoladzad","value":"IRAN"},
+			{"key":"blueness","value":"Buffalo NY, USA."},
+			{"key":"angusshire","value":"Berkeley, CA"},
+			{"key":"akatrevorjay","value":"San Francisco"},
+			{"key":"MLateralus","value":"Krakow"},
+			{"key":"mklimuk","value":"France"}
+			];
+		io.emit('setLoading', "");
+		handleFullResponse(dict)
 	});
 });
 
@@ -47,7 +67,7 @@ function getCurrentLocation(git_profile, callback){
 	var url_stream = 'https://api.github.com/users/' + git_profile
 	makeGitCall(url_stream, function(errorMessage, result){
 		if(errorMessage){
-			io.emit('addInfo', "Profile could not be resolved");
+			io.emit('addError', "Profile could not be resolved");
 		} else {
 			callback(result);
 		}
@@ -65,7 +85,7 @@ function findFollowers(git_profile){
 	var url_stream = 'https://api.github.com/users/' + git_profile + '/followers';
 	makeGitCall(url_stream, function(errorMessage, result){
 		if(errorMessage){
-			io.emit('addInfo', "Profile could not be resolved");
+			io.emit('addError', "Profile could not be resolved");
 		} else {
 			getFollowersProfile(result);
 		}
@@ -88,7 +108,7 @@ function getFollowersProfile(profiles){
 		var url_stream = 'https://api.github.com/users/' + elem.login;
 		makeGitCall(url_stream, function(errorMessage, result){
 			if(errorMessage){
-				io.emit('addInfo', errorMessage);
+				io.emit('addError', errorMessage);
 			} else {
 				followers.push({
 					key: result.login,
@@ -111,18 +131,41 @@ function getFollowersProfile(profiles){
 function handleFullResponse(dict){
 
 	io.emit('logWork', "Working with locations ...");
+	var iterator_flag = 0;
+	var returnArr = [];
 	
-	// Debug
-	console.log("current location: " + current_location)
-	console.log("dict: " + JSON.stringify(dict));
+	dict.forEach(function(elem, i){
+		if(elem.value == null){
+			dict.splice(i, 1)	
+		}
+	});
 	
 	dict.forEach(function(elem){
 		calculateDistance(elem.value, function(result, city){
-			// console.log("Dystans between :" + current_location + " and: " + city + " is equal: " + result + "km")
-			io.emit('addInfo', "Dystans between :" + current_location + " and: " + city + " is equal: " + result + "km" + "\n"); 
+			// Build a proper object to send back
+			returnArr.push({
+				"user": elem.key,
+				"city": city,
+				"distance": result
+			});
+			iterator_flag += 1;
+			if(iterator_flag == dict.length){
+				sendBack(returnArr);
+			}
 		})
-	})
-	
+	});
+}
+
+// function: sendBack
+	/*	params: returnArr
+	*	returns: undefined
+	*	desc: send event back to client, with Array of results
+	*/
+function sendBack(returnArr){
+	io.emit('clearLoading', "");
+	if(!returnArr.includes("Unable to connect to api.github") || !returnArr.includes("Unable to retrieve from www.dystans.org")){
+		io.emit('addInfo', returnArr); 
+	}
 
 }
 
@@ -136,7 +179,7 @@ function calculateDistance(city, callback){
 	url_stream = "http://www.dystans.org/route.json?stops=" + current_location + "|" + city
 	makeDystansCall(url_stream, function(errorMessage, result){
 		if(errorMessage){
-			io.emit('addInfo', errorMessage);
+			io.emit('addError', errorMessage);
 		} else {
 			callback(result, city)
 		}
@@ -162,6 +205,7 @@ var makeGitCall = function (url_stream, callback){
 			callback(undefined, response.body);
 		} else {
 			callback("Unable to connect to api.github", undefined);
+			// io.emit('clearLoading', "");
 		}
 	});
 }
@@ -182,6 +226,7 @@ var makeDystansCall = function (url_stream, callback){
 			callback(undefined, response.body.distance);
 		} else {
 			callback("Unable to retrieve from www.dystans.org", undefined);
+			io.emit('clearLoading', "");
 		}
 	});
 }
