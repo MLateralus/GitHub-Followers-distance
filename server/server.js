@@ -23,36 +23,35 @@ io.on('connection', function(socket) {
     socket.on('createMessage', function(message) {
         console.log("Server recieved :" + JSON.stringify(message))
 
-        // getCurrentLocation(message.text, function(result){
-        // current_location = result.location;
+        getCurrentLocation(message.text, function(result){
+			current_location = result.location;
 
-        // //Build current user
-        // io.emit('userInfo', result);
-        // findFollowers(message.text);
-        // io.emit('setLoading', "");
-
-        // });
+			// Build current user
+			io.emit('userInfo', result);
+			findFollowers(message.text);
+			io.emit('setLoading', "");
+        });
 		
 		// Debug:
-		var dict = [
-			{"key":"plnice","value":"Cracow, Poland"},
-			{"key":"cusspvz","value":"PÃ³voa de Varzim, Porto, Portugal"},
-			{"key":"THenry14","value":null},{"key":"Jarema","value":"Poland"},
-			{"key":"brunocasanova","value":"PÃ³voa de Varzim, Porto, Portugal"},
-			{"key":"mgwhitfield","value":"Boulder, CO"},
-			{"key":"Svarkovsky","value":"Ukraine"},
-			{"key":"slapab","value":"Krakow"},
-			{"key":"hagom","value":null},
-			{"key":"szemek","value":"GdaÅsk, Poland"},
-			{"key":"Faridoladzad","value":"IRAN"},
-			{"key":"blueness","value":"Buffalo NY, USA."},
-			{"key":"angusshire","value":"Berkeley, CA"},
-			{"key":"akatrevorjay","value":"San Francisco"},
-			{"key":"MLateralus","value":"Krakow"},
-			{"key":"mklimuk","value":"France"}
-			];
-		io.emit('setLoading', "");
-		handleFullResponse(dict)
+		// var dict = [
+			// {"key":"plnice","value":"Cracow, Poland"},
+			// {"key":"cusspvz","value":"PÃ³voa de Varzim, Porto, Portugal"},
+			// {"key":"THenry14","value":null},{"key":"Jarema","value":"Poland"},
+			// {"key":"brunocasanova","value":"PÃ³voa de Varzim, Porto, Portugal"},
+			// {"key":"mgwhitfield","value":"Boulder, CO"},
+			// {"key":"Svarkovsky","value":"Ukraine"},
+			// {"key":"slapab","value":"Krakow"},
+			// {"key":"hagom","value":null},
+			// {"key":"szemek","value":"GdaÅsk, Poland"},
+			// {"key":"Faridoladzad","value":"IRAN"},
+			// {"key":"blueness","value":"Buffalo NY, USA."},
+			// {"key":"angusshire","value":"Berkeley, CA"},
+			// {"key":"akatrevorjay","value":"San Francisco"},
+			// {"key":"MLateralus","value":"Krakow"},
+			// {"key":"mklimuk","value":"France"}
+			// ];
+		// io.emit('setLoading', "");
+		// handleFullResponse(dict)
 	});
 });
 
@@ -134,8 +133,10 @@ function handleFullResponse(dict){
 	var iterator_flag = 0;
 	var returnArr = [];
 	
+
 	dict.forEach(function(elem, i){
 		if(elem.value == null){
+			console.log("Clearing ut the null: "+ elem.key)
 			dict.splice(i, 1)	
 		}
 	});

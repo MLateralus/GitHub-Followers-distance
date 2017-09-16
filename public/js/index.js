@@ -39,7 +39,13 @@ socket.on('addInfo', function(returnArr) {
     if (returnArr.length > 10) {
         sortedArr = sortedArr.slice(0, 10);
     }
-
+	var header = document.createElement("span");
+	header.style.display = "block";
+	header.style.fontSize = "large";
+	header.style.margin = "50px";
+	header.innerHTML = "Non-null city -> Followers distance";
+	responseDistance.appendChild(header);
+	
     var table_responsive = document.createElement("div");
     table_responsive.className = "table-responsive";
     var table = document.createElement("table");
