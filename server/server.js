@@ -23,14 +23,14 @@ io.on('connection', function(socket) {
     socket.on('createMessage', function(message) {
         console.log("Server recieved :" + JSON.stringify(message))
 
-        getCurrentLocation(message.text, function(result){
-			current_location = result.location;
-
+        getCurrentLocation(message.text).then(function(result){
 			// Build current user
 			io.emit('userInfo', result);
 			findFollowers(message.text);
-			io.emit('setLoading', "");
-        });
+			io.emit('setLoading', "");	
+		}, function(err){
+			io.emit('addError', err);			
+		});
 		
 		// Debug:
 		// var dict = [
@@ -61,16 +61,15 @@ io.on('connection', function(socket) {
 	*	desc: makes git api call, to retrieve the location of searched user
 	*/
 function getCurrentLocation(git_profile, callback){
-	
 	io.emit('logWork', "Getting current user location ...");
-	var url_stream = 'https://api.github.com/users/' + git_profile
-	makeGitCall(url_stream, function(errorMessage, result){
-		if(errorMessage){
-			io.emit('addError', "Profile could not be resolved");
-		} else {
-			callback(result);
-		}
-	});
+	var url_stream = 'https://api.github.com/users/' + git_profile;
+	return new Promise(function(resolve, reject){
+		makeGitCall(url_stream).then(function(result){
+			resolve(result);
+		}, function(err){
+			reject("Profile could not be resolved")
+		});
+	});	
 }
 
 // function: findFollowers
@@ -82,12 +81,10 @@ function findFollowers(git_profile){
 	
 	io.emit('logWork', "Finding profile followers ...");
 	var url_stream = 'https://api.github.com/users/' + git_profile + '/followers';
-	makeGitCall(url_stream, function(errorMessage, result){
-		if(errorMessage){
-			io.emit('addError', "Profile could not be resolved");
-		} else {
-			getFollowersProfile(result);
-		}
+	makeGitCall(url_stream).then(function(result){
+		getFollowersProfile(result);
+	}, function(err){
+		io.emit('addError', "Profile could not be resolved");
 	});
 }
 
@@ -105,19 +102,17 @@ function getFollowersProfile(profiles){
 	io.emit('logWork', "Getting each profile location ...");
 	profiles.forEach(function(elem){
 		var url_stream = 'https://api.github.com/users/' + elem.login;
-		makeGitCall(url_stream, function(errorMessage, result){
-			if(errorMessage){
-				io.emit('addError', errorMessage);
-			} else {
-				followers.push({
-					key: result.login,
-					value: result.location
-				});
-				iterator_flag += 1;
-				if(iterator_flag == profiles.length){
-					handleFullResponse(followers);
-				}
+		makeGitCall(url_stream).then(function(result){
+			followers.push({
+				key: result.login,
+				value: result.location
+			});
+			iterator_flag += 1;
+			if(iterator_flag == profiles.length){
+				handleFullResponse(followers);
 			}
+		}, function(err){
+			io.emit('addError', err);
 		});
 	});	
 }
@@ -178,12 +173,10 @@ function sendBack(returnArr){
 	*/
 function calculateDistance(city, callback){
 	url_stream = "http://www.dystans.org/route.json?stops=" + current_location + "|" + city
-	makeDystansCall(url_stream, function(errorMessage, result){
-		if(errorMessage){
-			io.emit('addError', errorMessage);
-		} else {
-			callback(result, city)
-		}
+	makeDystansCall(url_stream).then(function(result){
+		callback(result, city)
+	}, function(err){
+		io.emit('addError', errorMessage);
 	});
 }
 
@@ -193,21 +186,23 @@ function calculateDistance(city, callback){
 	*	desc: Generic GitHub API call to retrieve anything found under the url_stream param.
 			and then pass it to the callback function
 	*/
-var makeGitCall = function (url_stream, callback){
-	request({
-		url: url_stream,
-		json: true,
-		headers: {
-			'User-Agent': 'Majkel-App'
+var makeGitCall = function (url_stream){
+	return new Promise(function(resolve, reject){
+		request({
+			url: url_stream,
+			json: true,
+			headers: {
+				'User-Agent': 'Majkel-App'
 			}
 		},
-	function(error, response, body){
-		if(!error && response.statusCode === 200){
-			callback(undefined, response.body);
-		} else {
-			callback("Unable to connect to api.github", undefined);
-			// io.emit('clearLoading', "");
-		}
+		function(error, response, body){
+			if(!error && response.statusCode === 200){
+				resolve(response.body);
+			} else {
+				reject("Unable to connect to api.github");
+				// io.emit('clearLoading', "");
+			}
+		});
 	});
 }
 
@@ -218,17 +213,19 @@ var makeGitCall = function (url_stream, callback){
 			and then pass the distance between input cities.
 	*/
 var makeDystansCall = function (url_stream, callback){
-	request({
-		url: url_stream,
-		json: true,
-	},
-	function(error, response, body){
-		if(!error && response.statusCode === 200){
-			callback(undefined, response.body.distance);
-		} else {
-			callback("Unable to retrieve from www.dystans.org", undefined);
-			io.emit('clearLoading', "");
-		}
+	return new Promise(function (resolve, reject){
+		request({
+			url: url_stream,
+			json: true,
+		},
+		function(error, response, body){
+			if(!error && response.statusCode === 200){
+				resolve(response.body.distance);
+			} else {
+				reject("Unable to retrieve from www.dystans.org");
+				io.emit('clearLoading', "");
+			}
+		});
 	});
 }
 
