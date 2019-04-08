@@ -176,7 +176,7 @@ function calculateDistance(city, callback){
 	makeDystansCall(url_stream).then(function(result){
 		callback(result, city)
 	}, function(err){
-		io.emit('addError', errorMessage);
+		io.emit('addError', err);
 	});
 }
 
